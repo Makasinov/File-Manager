@@ -1,0 +1,53 @@
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+
+    //ui->tabWidget  ->removeTab(0);
+    ui->tabWidget  ->removeTab(0);
+    //ui->tabWidget_2->removeTab(0);
+    ui->tabWidget_2->removeTab(0);
+
+    qDebug() << count;
+
+                                                // QDirModel *model = new QDirModel;
+                                                // After 99h+ I realized that QDirModel sucks
+    QFileSystemModel *model = new QFileSystemModel();
+    model->setFilter(QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot); // Hide dots
+    model->setRootPath("/");
+    QDir::setCurrent(QDir::rootPath());
+    model->setReadOnly(false);
+
+    for (int i = 1; i < count; ++i)
+    {
+        tree[i].setModel(model);
+        tree[i].setRootIndex(model->index(list.at(i).path()));
+        tree[i].addPath(ui->adressEdit);
+        tree[i].addFileName(ui->itemNameEdit);
+        tree[i].addTab(ui->tabWidget);
+
+        ui->tabWidget->addTab(&tree[i],list.at(i).path());
+    }
+
+    for (int i = 0,l = 2; i < count; ++i,++l)
+    {
+        tree[l].setModel(model);
+        tree[l].setRootIndex(model->index(list.at(i).path()));
+        tree[l].addPath(ui->adressEdit2);
+        tree[l].addFileName(ui->itemNameEdit2);
+        tree[l].addTab(ui->tabWidget_2);
+
+        ui->tabWidget_2->addTab(&tree[l],list.at(i).path());
+    }
+}
+
+MainWindow::~MainWindow()
+{ delete ui; }
+
+
+
+

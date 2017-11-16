@@ -1,0 +1,53 @@
+#ifndef CUSTOMTREE_H
+#define CUSTOMTREE_H
+
+#include <QDesktopServices>
+#include <QTableWidget>
+#include <QLineEdit>
+#include <QString>
+#include <QTreeView>
+#include <QObject>
+#include <QMouseEvent>
+#include <QDebug>
+#include <QMenu>
+#include <QAction>
+
+class CustomTree : public QObject
+{
+    Q_OBJECT
+public:
+    explicit CustomTree(QObject *parent = nullptr);
+    void addPath(QLineEdit * LineEdit)      {this->adressLine = LineEdit;}
+    void addFileName(QLineEdit * LineEdit)  {this->fileNameLine = LineEdit;}
+    void addTab(QTabWidget * tab) {this->tab = tab;}
+    ~CustomTree() { qDebug() << "destructor"; }
+
+signals:
+
+public slots:
+    void drawPath();
+    void openItem();
+    void popUp();
+    void popupCopy();
+    void popupCut();
+    void popupPaste();
+    void popupErase();
+    void popupRename();
+    void popupMkdir();
+
+private:
+    QMenu * menu = new QMenu; // popUp menu with 5 fields
+    QAction * paste  ;
+    QAction * copy   ;
+    QAction * erase  ;              // not delete, becase it's engaged
+    QAction * cut    ;
+    QAction * rename ;
+    QAction * mkdir  ;
+
+    QTabWidget * tab;
+    QLineEdit * adressLine;         // absolute path to file
+    QLineEdit * fileNameLine;
+
+};
+
+#endif // CUSTOMTREE_H

@@ -1,0 +1,109 @@
+#include "customtree.h"
+
+CustomTree::CustomTree(QTreeView *parent) : QTreeView(parent)
+{
+    this->setSortingEnabled(true);
+    this->setDragEnabled(true);
+    this->setAcceptDrops(true);
+    this->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    this->setSelectionMode(QTreeView::ContiguousSelection);
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    QObject::connect(this,SIGNAL(clicked(QModelIndex)),
+                     this,SLOT(drawPath()));
+    QObject::connect(this,SIGNAL(doubleClicked(QModelIndex)),
+                     this,SLOT(openItem()));
+    QObject::connect(this,SIGNAL(customContextMenuRequested(QPoint)),
+                     this,SLOT(drawPath()));
+    QObject::connect(this,SIGNAL(customContextMenuRequested(QPoint)),
+                     this,SLOT(   popUp()));
+
+        copy   = new QAction(QString::fromUtf8("Копировать"),this);
+        cut    = new QAction(QString::fromUtf8("Вырезать")  ,this);
+        paste  = new QAction(QString::fromUtf8("Вставить")  ,this);
+        paste->setEnabled(false);
+        erase  = new QAction(QString::fromUtf8("Удалить")   ,this);
+        rename = new QAction(QString::fromUtf8("Переименовать"),this);
+        mkdir  = new QAction(QString::fromUtf8("Создать")   ,this);
+
+        this->menu->addAction(copy);
+        this->menu->addAction(cut);
+        this->menu->addAction(paste);
+        this->menu->addAction(erase);
+        this->menu->addAction(rename);
+        this->menu->addAction(mkdir);
+
+        QObject::connect(this->copy,SIGNAL(toggled(bool)),
+                        this,SLOT(popupCopy()));
+}
+
+void CustomTree::drawPath()
+{
+    auto index = this->currentIndex();
+
+    auto index2 = index;
+    QString str =
+     this->model()->sibling(index2.row(),0,index2).data().toString();
+    index2 = index2.parent();
+
+    while ( index2.parent().data().toString() != NULL )
+    {
+        str = index2.data().toString() + "/" + str;
+        index2 = index2.parent();
+    }
+    str.insert(0,tab->tabText(tab->currentIndex()));
+
+    adressLine->setText(str);
+    fileNameLine->setText(index.sibling(index.row(),0).data().toString());
+}
+void CustomTree::openItem()
+{
+    if ( adressLine->text() != NULL )
+    {
+        QString str = "file:///";
+        str.append(adressLine->text());
+        QDesktopServices::openUrl(
+         QUrl(str,
+         QUrl::TolerantMode));
+    }
+}
+void CustomTree::popUp()
+{
+    menu->popup(QCursor::pos());
+}
+
+void CustomTree::popupCopy()
+{
+    qDebug() << "action!";
+}
+void CustomTree::popupCut()
+{
+    qDebug() << "action!";
+}
+void CustomTree::popupPaste()
+{
+    qDebug() << "action!";
+}
+void CustomTree::popupErase()
+{
+    qDebug() << "action!";
+}
+void CustomTree::popupRename()
+{
+    qDebug() << "action!";
+}
+void CustomTree::popupMkdir()
+{
+    qDebug() << "action!";
+}
+
+
+
+
+
+
+
+
+
+
+
