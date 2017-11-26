@@ -17,6 +17,19 @@
 #include <QDropEvent>
 #include <QDirModel>
 #include <QTimer>
+#include <QTimerEvent>
+#include <QKeyEvent>
+
+class Tree : public QTreeView
+{
+    Q_OBJECT
+protected:
+    bool event(QEvent *event)
+    {
+        if ( event->type() != QEvent::Timer ) qDebug() << event;
+        return true;
+    }
+};
 
 namespace Ui {
 class MainWindow;
@@ -34,16 +47,13 @@ public:
     int selectedCount;
     QModelIndex selectedIndex;
 
-signals:
-    virtual void keyPressEvent(QKeyEvent* event);
-
 private slots:
     void debug()
     {   qDebug() << "DEBUG";    }
     void dragEnterEventSlot(QDragEnterEvent *event)
-    {qDebug() << event;}
+    {   qDebug() << event;  }
     void dropEventSlot(QDropEvent *event)
-    {qDebug() << event;}
+    {   qDebug() << event;  }
 
 private:
     Ui::MainWindow *ui;
@@ -51,9 +61,13 @@ private:
     QList<QString> * vec = new QList<QString>; // actually it's list,
                                                // but this name already
                                                // exists :3 (vector)
-    QList<QModelIndex> *vec2 = new QList<QModelIndex>;
     QFileInfoList list = QDir::drives();
     int count = list.count();
+
+    Tree * tree = new Tree[count + count];
+    //QTreeView * tree = new QTreeView[count + count];
+    CustomTree * arr = new CustomTree[count + count];
+    QTimer timer;
 };
 
 #endif // MAINWINDOW_H

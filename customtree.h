@@ -2,7 +2,6 @@
 #define CUSTOMTREE_H
 
 #include "prop.h"
-#include <windows.h>
 #include <QTreeView>
 #include <QStandardItem>
 #include <QDesktopServices>
@@ -41,12 +40,11 @@ public:
     void addCount(qint32 &SC) {this->selectedCount = &SC;}                   //
     void addVec(QList<QString> &L) {this->vec = &L;}                         //
     void eventHandle(QKeyEvent *event);                                      //
+    static const char slash = '/';                                           //
+    static const char nonSlash = '\\';                                       //
 
 public slots:
-    void checkSelected()
-    {
-        itemsSelected = this->tree->selectionModel()->selectedRows().length();
-    }
+    void checkSelected();
     void drawPath();
     void openItem();
     void popUp();

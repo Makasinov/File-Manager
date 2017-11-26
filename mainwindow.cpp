@@ -33,9 +33,6 @@ MainWindow::MainWindow(QWidget *parent) :
         QObject::connect(&timer,SIGNAL(timeout()),
                          &arr[i],SLOT(refreshTree()));
 
-        QObject::connect(&tree[i],SIGNAL(),
-                         &arr[i],SLOT(checkSelected()));
-
         arr[i].addVec(*vec);
         arr[i].addModel(model);
         arr[i].addTree(&tree[i]);
@@ -58,9 +55,6 @@ MainWindow::MainWindow(QWidget *parent) :
         QObject::connect(&timer,SIGNAL(timeout()),
                          &arr[l],SLOT(refreshTree()));
 
-        QObject::connect(&tree[l],SIGNAL(clicked(QModelIndex)),
-                         &arr[l],SLOT(checkSelected()));
-
         arr[l].addVec(*vec);
         arr[l].addModel(model);
         arr[l].addTree(&tree[l]);
@@ -77,15 +71,16 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 bool MainWindow::event(QEvent * event)
 {
-    if ( event->type() == QEvent::KeyRelease ){
+    const auto CtrlPlusC = "\u0003";
+    if ( event->type() == QEvent::KeyPress){
         QKeyEvent * keyEvent = static_cast<QKeyEvent *>(event);
-        //qDebug() << keyEvent;
+        //qDebug() << keyEvent->text();
         for ( int i = 0; i < (count + count); i++ )
-            if (tree[i].hasFocus() && keyEvent->key() == Qt::Key_Delete)
+            if (tree[i].hasFocus() )
             {
-                //qDebug() << event << "\t DELETE_PRESSED";
-                arr[i].popupErase();
-                //qDebug() << &arr[i];
+                //if ( keyEvent->text()[5] == '3' );
+          //          qDebug() << keyEvent->text() << " event!";
+                //else if ( ) qDebug() << "Delete event!"
                 break;
             }
     };

@@ -20,19 +20,6 @@
 #include <QKeyEvent>
 #include <QWidget>
 
-class TREE : public QTreeView
-{
-    Q_OBJECT
-signals:
-    void dataChanged(const QModelIndex &topLeft,
-                     const QModelIndex &bottomRight,
-                     const QVector<int> &roles)
-    {
-        qDebug() << "changed";
-        QTreeView::dataChanged(topLeft,bottomRight,roles);
-    }
-};
-
 namespace Ui {
 class MainWindow;
 }
@@ -64,7 +51,7 @@ private:
     QFileInfoList list = QDir::drives();
     int count = list.count();
 
-    TREE * tree = new TREE[count + count];
+    QTreeView * tree = new QTreeView[count + count];
     CustomTree * arr = new CustomTree[count + count];
     QTimer timer;
 

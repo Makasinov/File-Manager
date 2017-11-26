@@ -1,38 +1,45 @@
 #include "customtree.h"
+#include <boost/filesystem.hpp>
+#include <iostream>
+#include <string.h>
+/*
+ * This function provides recursively copy the folder and files
+ */
+bool scanDir(QString oldFile, QString newFile, boost::system::error_code error_code)
+{
+    qDebug() << "scanDir - " << oldFile << "\t" << newFile;
+    boost::filesystem::create_directory(newFile.toStdWString(),error_code);
+    //if ( error_code )
+    //boost::filesystem::copy_directory(oldFile.toStdWString(),newFile.toStdWString(),error_code);
 
-void CustomTree::popupCut()
-{
-    this->popupCopy();
-    *cutted = true;
-}
-void CustomTree::eventHandle(QKeyEvent *event)
-{
-    this->popupErase();
-}
-void CustomTree::popupCopy()
-{
-    if ( itemsSelected != 0)
+    boost::filesystem::path path(oldFile.toStdWString());
+
+    boost::filesystem::directory_iterator end_itr;
+    qDebug() << "Nu poehali - " << oldFile;
+    for (boost::filesystem::directory_iterator itr(path); itr != end_itr; ++itr)
     {
-        *selectedIndex = this->tree->selectionModel()->selectedRows().at(0);
-        *selectedCount = this->tree->selectionModel()->selectedRows().length();
-        *empty = false; *cutted = false; vec->clear();
-        QFileInfo info;
-        for (int i = 0; i < *selectedCount ; i++)
-        {
-            info = this->model->fileInfo(
-                        this->tree->selectionModel()->selectedRows().at(i));
-            vec->push_front(info.fileName());
-            vec->push_front(info.absoluteFilePath());
-        }
-    }
-        else
-    {
-        vec->clear();
-        *empty = true;
+        //if (boost::filesystem::is_regular_file(itr->path())) {
+            std::string current_file = itr->path().string();
+            QString oldFile = newFile;
+            oldFile += CustomTree::slash;
+            QString var = current_file.data();
+            int position = var.length();
+            qDebug() << "-" << var;
+            while ( var[position] != CustomTree::nonSlash) --position;
+            var.remove(0,(position + 1));
+            //qDebug() << "after - " << var << "\t";
+            oldFile += var;
+            if ( ! boost::filesystem::is_directory(current_file.data()) )
+            boost::filesystem::copy_file(current_file.data(),oldFile.toStdWString(),error_code);
+                    else scanDir(current_file.data(),oldFile,error_code);
+            qDebug() << "\t" << current_file.data() << " | " << oldFile ;
+        //}
     }
 }
+
 void CustomTree::popupPaste()
 {
+    checkSelected();
     if ( !vec->isEmpty() )
     {
         *empty = true;
@@ -48,26 +55,61 @@ void CustomTree::popupPaste()
             newFile += "/";
             newFile += *(it++);
 
+            boost::system::error_code error_code;
 
-            std::wstring wstr1 = oldFile.toStdWString();
-            LPCWSTR path1 = wstr1.c_str();
-
-            std::wstring wstr2 = newFile.toStdWString();
-            LPCWSTR path2 = wstr2.c_str();
-
-            WINBOOL errorFounded;
-
-            if ( *cutted && !MoveFile(path1,path2) )
-                QMessageBox::warning(this->tree, tr("Упс..."),tr("При перемещении произошла ошибка"));
-            else
+            if ( *cutted )
             {
-                CopyFile(path1,path2,errorFounded);
-                if ( !errorFounded )
+                boost::filesystem::rename(oldFile.toStdWString(),newFile.toStdWString(),error_code);
+                if ( error_code )
+                QMessageBox::warning(this->tree, tr("Упс..."),tr("При перемещении произошла ошибка"));
+            } else {
+                if ( boost::filesystem::is_directory(oldFile.toStdWString(),error_code) )
+                {
+                    qDebug() << "directory - " << oldFile;
+                    scanDir(oldFile,newFile,error_code);
+                }   else    {
+                    qDebug() << "file - " << oldFile;
+                    boost::filesystem::copy_file(oldFile.toStdWString(),newFile.toStdWString(),error_code);
+                }
+
+                if ( error_code )
                     QMessageBox::warning(this->tree, tr("Упс.."),tr("При копировании произошла ошибка"));
             }
-            qDebug() << oldFile << " -> " << newFile;
+            //qDebug() << oldFile << " -> " << newFile;
             this->model->refresh();
         }
+    }
+}
+
+void CustomTree::popupCut()
+{
+    checkSelected();
+    this->popupCopy();
+    *cutted = true;
+}
+void CustomTree::eventHandle(QKeyEvent *event)
+{
+    this->popupErase();
+}
+void CustomTree::popupCopy()
+{
+    checkSelected();
+    if ( itemsSelected != 0)
+    {
+        *selectedIndex = this->tree->selectionModel()->selectedRows().at(0);
+        *selectedCount = this->tree->selectionModel()->selectedRows().length();
+        *empty = false; *cutted = false; vec->clear();
+        QFileInfo info;
+        for (int i = 0; i < *selectedCount ; i++)
+        {
+            info = this->model->fileInfo(
+                        this->tree->selectionModel()->selectedRows().at(i));
+            vec->push_front(info.fileName());
+            vec->push_front(info.absoluteFilePath());
+        }
+    }   else    {
+        vec->clear();
+        *empty = true;
     }
 }
 
@@ -131,7 +173,7 @@ void CustomTree::drawPath()
 
     while ( index2.parent().data().toString() != NULL )
     {
-        str = index2.data().toString() + "/" + str;
+        str = index2.data().toString() + slash + str;
         index2 = index2.parent();
     }
     str.insert(0,tab->tabText(tab->currentIndex()));
@@ -152,53 +194,72 @@ void CustomTree::openItem()
 }
 void CustomTree::popUp()
 {
-    //itemsSelected = this->tree->selectionModel()->selectedRows().length();
-    //qDebug() << "rows - " << itemsSelected;
-        if ( itemsSelected != 0 )
-        {
-            if (!*empty) paste->setEnabled(true);
-                else paste->setEnabled(false);
+    checkSelected();
+    if ( itemsSelected != 0 )
+    {
+        if (!*empty) paste->setEnabled(true);
+            else paste->setEnabled(false);
 
-            this->copy->setEnabled(true);
-            this->cut->setEnabled(true);
-            this->rename->setEnabled(true);
-            this->erase->setEnabled(true);
-        } else {
-            if (!*empty) paste->setEnabled(true);
-                else paste->setEnabled(false);
-            this->copy->setEnabled(false);
-            this->cut->setEnabled(false);
-            this->rename->setEnabled(false);
-            this->erase->setEnabled(false);
-        }
-        if (this->tree->currentIndex().isValid()
-                &&
-            !model->isDir(this->tree->currentIndex())
-           ) this->mkdir->setEnabled(false);
-             else this->mkdir->setEnabled(true);
-        menu->popup(QCursor::pos());
+        this->copy->setEnabled(true);
+        this->cut->setEnabled(true);
+        this->rename->setEnabled(true);
+        this->erase->setEnabled(true);
+    } else {
+        if (!*empty) paste->setEnabled(true);
+            else paste->setEnabled(false);
+        this->copy->setEnabled(false);
+        this->cut->setEnabled(false);
+        this->rename->setEnabled(false);
+        this->erase->setEnabled(false);
+    }
+    if (this->tree->currentIndex().isValid()
+        &&
+    !model->isDir(this->tree->currentIndex())
+    ) this->mkdir->setEnabled(false);
+        else this->mkdir->setEnabled(true);
+    menu->popup(QCursor::pos());
 }
 
 void CustomTree::popupErase()
 {
+    checkSelected();
     if ( itemsSelected != 0 )
     {
-        for (int i = 0; i < itemsSelected; i++)
+        popupCopy();
+        auto it = vec->begin();
+        qDebug() << vec->begin().operator *();
+        while (it != vec->end())
         {
-            auto index = this->tree->selectionModel()->selectedRows(0).at(0);
+            //auto index = this->tree->selectionModel()->selectedRows(0).at(0);
             //qDebug() << index.data().toString();
-            bool ok = this->model->remove(index);
-            if ( ok ) continue;
-            else {
+            //bool ok = this->model->remove(index);
+            boost::system::error_code error_code;
+
+            QString file = it.operator *();
+//            if ( boost::filesystem::is_directory(file.toStdString(),error_code) )
+//                boost::filesystem::remove_all()
+            boost::filesystem::remove_all(file.toStdWString(),error_code );
+            it += 2;
+
+            if ( error_code )
+            {
                 QMessageBox::warning(this->tree, tr("Ошибка"),
-                                     tr("Ошибка удаления %1").arg(
-                                         model->fileName(index))); continue;
+                            tr("Ошибка удаления %1").arg(file)); continue;
             }
         }
+        QString text = adressLine->text();
+        while ( *(text.end() - 1) != slash )
+        {
+            text.remove(-1,text.length());
+            //qDebug() << *text.end() << "\t" << text;
+        }
+        text.remove(-1,text.length());
+        adressLine->setText(text);
     }
 }
 void CustomTree::popupRename()
 {
+    checkSelected();
     auto index = this->tree->currentIndex();
     if ( itemsSelected != 0 ) this->tree->edit(
                 tree->model()->sibling(index.row(),0,index));
@@ -206,20 +267,18 @@ void CustomTree::popupRename()
 }
 void CustomTree::popupMkdir()
 {
-    QModelIndex index;
+    //auto index = this->tree->cur
     if ( itemsSelected != 0 )
-        index = this->tree->currentIndex();
-    else
-        index = this->tree->rootIndex();
-
-    QString name = QInputDialog::getText(tree, tr("Создать папку "), tr("Имя папки "));
-    if ( !name.isEmpty() )
     {
-        if ( !model->isDir(index) ) {
-            index = model->parent(index);
-        }
-        if ( !model->mkdir(index, name).isValid() ) {
-            QMessageBox::information(tree, tr("Ошибка создания папки..."), tr("Ошибка во время создания директории"));
+        QString name = QInputDialog::getText(tree, tr("Создание директории "),
+                                               tr("Имя папки "));
+        if ( !name.isEmpty() )
+        {
+            //qDebug() << adressLine << " + " << name;
+            QString newDir = adressLine->text() + slash + name ;
+            if ( !boost::filesystem::create_directory(newDir.toStdWString()) )
+            QMessageBox::information(tree, tr("Ошибка создания папки..."),
+                                tr("Ошибка во время создания директории"));
         }
     }
 }
@@ -263,10 +322,10 @@ void CustomTree::addTree(QTreeView *tree)
                          this,SLOT(popUp()   ));
 }
 
-
-
-
-
+void CustomTree::checkSelected()
+{
+    itemsSelected = this->tree->selectionModel()->selectedRows().length();
+}
 
 
 

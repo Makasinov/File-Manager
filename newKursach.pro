@@ -50,3 +50,37 @@ DISTFILES += \
     search.png \
     search.png
 
+#QMAKE_CXXFLAGS += -std=c++17
+
+#CONFIG += c++17
+#QMAKE_CXXFLAGS+= -std=c++17
+#QMAKE_LFLAGS +=  -std=c++17
+#CONFIG += c++1z
+
+#INCLUDEPATH += B:/boost_1_65_1/
+#LIBS += "-LB:/boost_1_65_1/libs/"
+
+win32-g++ {
+    INCLUDEPATH += B:/BOOST/boost_mingw530_32/include/boost-1_65_1
+    LIBS += "-LB:/BOOST/boost_mingw530_32/lib" \
+            -llibboost_filesystem-mgw53-mt-1_65_1.dll \
+            -llibboost_filesystem-mgw53-mt-d-1_65_1.dll \
+            -llibboost_system-mgw53-mt-1_65_1.dll \
+            -llibboost_system-mgw53-mt-d-1_65_1
+            #-llibboost_date_time-mgw53-mt-1_65_1.dll \
+            #-llibboost_date_time-mgw53-mt-1_65_1.dll.a \
+            #-llibboost_date_time-mgw53-mt-d-1_65_1.dll \
+            #-llibboost_date_time-mgw53-mt-d-1_65_1.dll.a
+            #-lboost_system
+
+} else:win32-msvc* {
+    INCLUDEPATH += B:/BOOST/boost_msvc/include/boost-1_65_1
+    LIBS += "-LB:/BOOST/boost_msvc/lib" \
+            #-llibboost_date_time-mgw53-mt-1_65_1.dll \
+            #-llibboost_date_time-mgw53-mt-1_65_1.dll.a \
+            #-llibboost_date_time-mgw53-mt-d-1_65_1.dll \
+            #-llibboost_date_time-mgw53-mt-d-1_65_1.dll.a \
+
+}
+#CONFIG += console
+
