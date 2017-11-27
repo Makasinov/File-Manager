@@ -21,6 +21,9 @@
 #include <QList>
 #include <QKeyEvent>
 #include <QTimer>
+#include <boost/filesystem.hpp>
+#include <iostream>
+#include <string.h>
 
 class CustomTree : public QObject
 {
@@ -29,6 +32,7 @@ class CustomTree : public QObject
 public:
     CustomTree(QObject *parent = nullptr);
     void addPath(QLineEdit * LineEdit)      {this->adressLine = LineEdit;}   //
+    void addOtherPath(QLineEdit * LineEdit) {this->adressLine_2 = LineEdit;} //
     void addFileName(QLineEdit * LineEdit)  {this->fileNameLine = LineEdit;} //
     void addTab(QTabWidget * tab) {this->tab = tab;}                         //
     void addTree(QTreeView * tree);                                          //
@@ -40,6 +44,7 @@ public:
     void addCount(qint32 &SC) {this->selectedCount = &SC;}                   //
     void addVec(QList<QString> &L) {this->vec = &L;}                         //
     void eventHandle(QKeyEvent *event);                                      //
+    bool scanDir(std::wstring oldFile, std::wstring newFile, boost::system::error_code error_code);
     static const char slash = '/';                                           //
     static const char nonSlash = '\\';                                       //
 
@@ -81,6 +86,7 @@ private:
 
     QTabWidget * tab;
     QLineEdit  * adressLine;         // absolute path to file
+    QLineEdit  * adressLine_2;       // second one
     QLineEdit  * fileNameLine;
 
 };

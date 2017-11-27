@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QStorageInfo>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
         arr[i].addModel(model);
         arr[i].addTree(&tree[i]);
         arr[i].addPath(ui->adressEdit);
+        arr[i].addOtherPath(ui->adressEdit2);
         arr[i].addFileName(ui->itemNameEdit);
         arr[i].addTab(ui->tabWidget);
         arr[i].addClipboard(this->selectedIndex);
@@ -45,6 +47,11 @@ MainWindow::MainWindow(QWidget *parent) :
         arr[i].addCut(this->cutted);
 
         ui->tabWidget->addTab(&tree[i],list.at(i).path());
+
+        QStorageInfo storage;
+        storage.setPath(list.at(i).path());
+        if ( storage.bytesAvailable()/1000/1000 == 0 )
+            ui->tabWidget->widget(i)->setEnabled(false);
     }
 
     for (int i = 0,l = count; l < count + count; ++i,++l)
@@ -59,6 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
         arr[l].addModel(model);
         arr[l].addTree(&tree[l]);
         arr[l].addPath(ui->adressEdit2);
+        arr[l].addOtherPath(ui->adressEdit);
         arr[l].addFileName(ui->itemNameEdit2);
         arr[l].addTab(ui->tabWidget_2);
         arr[l].addClipboard(this->selectedIndex);
@@ -67,6 +75,11 @@ MainWindow::MainWindow(QWidget *parent) :
         arr[l].addCut(this->cutted);
 
         ui->tabWidget_2->addTab(&tree[l],list.at(i).path());
+
+        QStorageInfo storage;
+        storage.setPath(list.at(i).path());
+        if ( storage.bytesAvailable()/1000/1000 == 0 )
+            ui->tabWidget_2->widget(i)->setEnabled(false);
     }
 }
 bool MainWindow::event(QEvent * event)
