@@ -6,7 +6,9 @@
 namespace Ui {
 class Prop;
 }
-
+/*! \brief Prop (Properties) - Класс отображающий свойство файла.
+	Если в кратце, то просто очень сырой и не нужный.
+*/
 class Prop : public QWidget
 {
     Q_OBJECT

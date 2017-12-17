@@ -34,10 +34,7 @@ HEADERS += \
         mainwindow.h \
         customtree.h \
         prop.h \
-    customtree (Конфликтующая копия с компьютера MAIN-PC 2017-11-01).h \
-    customtree (Конфликтующая копия с компьютера maksimov 2017-11-04).h \
     customtree.h \
-    mainwindow (Конфликтующая копия с компьютера maksimov 2017-11-04).h \
     mainwindow.h \
     prop.h
 
@@ -46,9 +43,7 @@ FORMS += \
         prop.ui \
         prop.ui
 
-DISTFILES += \
-    search.png \
-    search.png
+
 
 #QMAKE_CXXFLAGS += -std=c++17
 
@@ -83,4 +78,6 @@ win32-g++ {
 
 }
 #CONFIG += console
+RC_FILE     = resources.rc
+
 

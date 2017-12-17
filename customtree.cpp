@@ -1,11 +1,12 @@
 #include "customtree.h"
 
-/*
- * This function provides recursively copy the folder and files
+/*!
+ * This function provides recursively copy the folder and files.
+ * Эта функция позволяет рекурсивно делать копии папок и файлов.
  */
 bool CustomTree::scanDir(std::wstring oldFile, std::wstring newFile, boost::system::error_code error_code)
 {
-    qDebug() << "scanDir - " << oldFile.data() << "\t" << newFile.data();
+    //qDebug() << "scanDir - " << oldFile.data() << "\t" << newFile.data();
     boost::filesystem::create_directory(newFile.data(),error_code);
     //if ( error_code )
     //boost::filesystem::copy_directory(oldFile.toStdWString(),newFile.toStdWString(),error_code);
@@ -13,7 +14,7 @@ bool CustomTree::scanDir(std::wstring oldFile, std::wstring newFile, boost::syst
     boost::filesystem::path path(oldFile.data());
 
     boost::filesystem::directory_iterator end_itr;
-    qDebug() << "Nu poehali - " << oldFile.data();
+    //qDebug() << "Nu poehali - " << oldFile.data();
     for (boost::filesystem::directory_iterator itr(path); itr != end_itr; ++itr)
     {
         //if (boost::filesystem::is_regular_file(itr->path())) {
@@ -22,19 +23,19 @@ bool CustomTree::scanDir(std::wstring oldFile, std::wstring newFile, boost::syst
             oldFile += CustomTree::slash;
             std::wstring var = current_file.data();
             int position = var.length();
-            qDebug() << "-" << var.data();
+            //qDebug() << "-" << var.data();
             while ( var[position] != CustomTree::nonSlash) --position;
             var.erase(0,(position + 1));
-            qDebug() << "after - " << var.data() << "\t";
+            //qDebug() << "after - " << var.data() << "\t";
             oldFile += var;
             if ( boost::filesystem::is_directory(current_file.data()) )
                 scanDir(current_file,oldFile,error_code);
             else boost::filesystem::copy_file(current_file.data(),oldFile.data(),error_code) ;
-            qDebug() << "\t" << current_file.data() << " | " << oldFile.data() ;
+            //qDebug() << "\t" << current_file.data() << " | " << oldFile.data() ;
         //}
     }
 }
-
+/// Метод вставки выделенных файлов/каталогов.
 void CustomTree::popupPaste()
 {
     checkSelected();
@@ -87,10 +88,16 @@ void CustomTree::popupCut()
     this->popupCopy();
     *cutted = true;
 }
+/// Пока не используется
+/// TODO - Обработчик горячих клавиш.
 void CustomTree::eventHandle(QKeyEvent *event)
 {
     this->popupErase();
 }
+/*! \brief Метод, где все выделенные файлы загружаются в QList<QString>.
+	Также используется и для вырезания, и для удаления, но немного иначе.
+	\brief Если коротко, то здесь программа запоминает все выделенные файлы.
+*/
 void CustomTree::popupCopy()
 {
     checkSelected();
@@ -113,7 +120,8 @@ void CustomTree::popupCopy()
     }
 }
 
-////////////////////////////// OTHER CODE /////////////////////////////////
+/*! \brief Здесь налаживаются все связи между событиями.
+*/
 CustomTree::CustomTree(QObject *parent) : QObject(parent)
 {
         copy   = new QAction(QString::fromUtf8("Копировать")   ,this);
@@ -162,6 +170,7 @@ CustomTree::CustomTree(QObject *parent) : QObject(parent)
                              this,SLOT(popupMkdir()));
 
 }
+/// отрисовка пути до выделенного файла в UI.
 void CustomTree::drawPath()
 {
     auto index = tree->currentIndex();
@@ -181,6 +190,7 @@ void CustomTree::drawPath()
     adressLine->setText(str);
     fileNameLine->setText(index.sibling(index.row(),0).data().toString());
 }
+/// openItem - Конструкция, открывающая файл по нажатию двойного щелчка.
 void CustomTree::openItem()
 {
     if ( adressLine->text() != NULL )
@@ -192,6 +202,8 @@ void CustomTree::openItem()
          QUrl::TolerantMode));
     }
 }
+/// Метод происходит, когда выпадает контекствое меню.
+/// Здесь включаются и выключаются необходимые кнопки.
 void CustomTree::popUp()
 {
     checkSelected();
@@ -219,7 +231,7 @@ void CustomTree::popUp()
         else this->mkdir->setEnabled(true);
     menu->popup(QCursor::pos());
 }
-
+/// метод удаления выделеных файлов/директорий
 void CustomTree::popupErase()
 {
     checkSelected();
@@ -227,7 +239,7 @@ void CustomTree::popupErase()
     {
         popupCopy();
         auto it = vec->begin();
-        qDebug() << vec->begin().operator *();
+        //qDebug() << vec->begin().operator *();
         while (it != vec->end())
         {
             //auto index = this->tree->selectionModel()->selectedRows(0).at(0);
@@ -320,7 +332,7 @@ void CustomTree::addTree(QTreeView *tree)
         QObject::connect(this->tree,SIGNAL(customContextMenuRequested(QPoint)),
                          this,SLOT(popUp()   ));
 }
-
+/// Метод который проверяет количество выделеных файлов в рабочей области.
 void CustomTree::checkSelected()
 {
     itemsSelected = this->tree->selectionModel()->selectedRows().length();

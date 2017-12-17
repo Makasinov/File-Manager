@@ -2,6 +2,7 @@
 #define CUSTOMTREE_H
 
 #include "prop.h"
+//#include <build/doxygen.h>
 #include <QTreeView>
 #include <QStandardItem>
 #include <QDesktopServices>
@@ -24,7 +25,10 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 #include <string.h>
-
+//! \brief Класс посредник
+/*! В этот класс в самом начале закидываются все необходимые элементы управления,
+	переменные, объекты, чтобы далее с ними было проще обращаться из одног места.
+ */ 
 class CustomTree : public QObject
 {
     Q_OBJECT
@@ -44,7 +48,8 @@ public:
     void addCount(qint32 &SC) {this->selectedCount = &SC;}                   //
     void addVec(QList<QString> &L) {this->vec = &L;}                         //
     void eventHandle(QKeyEvent *event);                                      //
-    bool scanDir(std::wstring oldFile, std::wstring newFile, boost::system::error_code error_code);
+    bool scanDir(std::wstring oldFile, std::wstring newFile, 				 //
+		         boost::system::error_code error_code);						 //
     static const char slash = '/';                                           //
     static const char nonSlash = '\\';                                       //
 
@@ -61,6 +66,7 @@ public slots:
     void popupProp();
     void popupMkdir();
     void refreshTree() {   this->model->refresh();   }
+	/// этот метод не несет в себе никакого смысла, создан для отладки.
     void debug() {  qDebug() << "DEBUUUUG"; }
 
 private:
